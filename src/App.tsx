@@ -14,7 +14,7 @@ import {
   FormErrorMessage,
   ChakraProvider,
 } from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
+import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { RiErrorWarningLine } from "react-icons/ri";
 import theme from "./theme";
 
@@ -65,8 +65,8 @@ const AccountForm = () => {
     getValues,
   } = useForm<FormValues>({ mode: "onBlur" });
 
-  const onSubmit = (data: any) => console.log("submit", data);
-  const onError = (errors: any) => console.log("errors", errors);
+  const onSubmit: SubmitHandler<FormValues> = (data) => console.log("submit", data);
+  const onError: SubmitErrorHandler<FormValues> = (errors) => console.log("errors", errors);
 
   return (
     <ChakraProvider theme={theme}>
