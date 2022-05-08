@@ -10,33 +10,13 @@ import {
   AlertIcon,
   AlertDescription,
   Input,
-  Button
+  Button,
+  FormErrorMessage,
 } from "@chakra-ui/react";
+import { useForm } from "react-hook-form";
 import { RiErrorWarningLine } from "react-icons/ri";
 
 /*
-Task:
-  - 處理表單畫面（包括錯誤狀態），請參考以下連結
-    - https://www.sketch.com/s/47b60fce-ba90-4120-bc86-6d844bc19b38/a/eKGWzAp#Inspector
-    - https://www.sketch.com/s/47b60fce-ba90-4120-bc86-6d844bc19b38/a/GmQeyV8#Inspector
-  - 新增 theme 並透過 theme 客製化元件樣式，像是 Button, Input 等
-    - https://chakra-ui.com/docs/theming/customize-theme
-    - https://www.sketch.com/s/47b60fce-ba90-4120-bc86-6d844bc19b38/a/R1xJkPZ#Inspector
-  - 透過 react-hook-form 實作表單行為
-      - ref: https://react-hook-form.com/
-  - 完成表單驗證
-    - 密碼欄位都必填
-    - 密碼格式錯誤
-      - Minimum eight characters, at least one letter, one number and one special character.
-        - A-Z, a-z
-        - 0-9
-        - special character
-          - !@#$%^&*()_+
-    - 確認密碼格式錯誤
-      - Please make sure your passwords match.
-    - onBlur 事件觸發時，進行表單驗證
-    - 按下 Submit 按鈕後，印出 form data
-
 Task:
   - Create form layout, including error handling for invalid state
     - https://www.sketch.com/s/47b60fce-ba90-4120-bc86-6d844bc19b38/a/eKGWzAp
@@ -66,7 +46,26 @@ Style guide:
     - primaryHover: '#fc7365',  
 
 */
+
+const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]/;
+
+interface FormValues {
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
 const AccountForm = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm<FormValues>({ mode: "onBlur" });
+
+  const onSubmit = (data: any) => console.log("submit", data);
+  const onError = (errors: any) => console.log("errors", errors);
+
   return (
     <Box bgColor="#f3f3f3" h="100vh">
       <Center>
@@ -89,11 +88,12 @@ const AccountForm = () => {
                 <Alert status="error" bgColor="#feeeed">
                   <AlertIcon as={RiErrorWarningLine} />
                   <AlertDescription fontSize="12px" color="#f65e4e">
-                    Your account don’t have password yet. Set password so you
-                    can log in with your Layoutbase account.
+                    Your account don’t have password yet. Set password so you can log in with your Layoutbase
+                    account.
                   </AlertDescription>
                 </Alert>
               </FormControl>
+
               <FormControl>
                 <FormLabel htmlFor="email" fontSize="12px" color="#585858">
                   Email (Your account)
@@ -106,34 +106,58 @@ const AccountForm = () => {
                     bgColor: "#eeeeee",
                     color: "#d0d0d0",
                     opacity: 1,
-                    cursor: "not-allowed"
+                    cursor: "not-allowed",
                   }}
+                  {...register("email")}
                 />
               </FormControl>
-              <FormControl>
+
+              <FormControl isInvalid={!!errors.password}>
                 <FormLabel htmlFor="password" fontSize="12px" color="#585858">
                   Set Password
                 </FormLabel>
                 <Input
                   id="password"
                   _focus={{ borderColor: "#f65e4e", boxShadow: "none" }}
+                  {...register("password", {
+                    required: "Password is required!",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters",
+                    },
+                    pattern: {
+                      value: PASSWORD_PATTERN,
+                      message: "Password must be at least one letter, one number and one special character.",
+                    },
+                  })}
                 />
+                {errors.password && <FormErrorMessage>{errors.password.message}</FormErrorMessage>}
               </FormControl>
-              <FormControl>
-                <FormLabel
-                  htmlFor="confirmPassword"
-                  fontSize="12px"
-                  color="#585858"
-                >
+
+              <FormControl isInvalid={!!errors.confirmPassword}>
+                <FormLabel htmlFor="confirmPassword" fontSize="12px" color="#585858">
                   Confirm Password
                 </FormLabel>
                 <Input
                   id="confirmPassword"
                   _focus={{ borderColor: "#f65e4e", boxShadow: "none" }}
+                  {...register("confirmPassword", {
+                    required: "Please confirm password!",
+                    validate: {
+                      matchesPreviousPassword: (value) => {
+                        const { password } = getValues();
+                        return password === value || "Please make sure your passwords match.";
+                      },
+                    },
+                  })}
                 />
+                {errors.confirmPassword && (
+                  <FormErrorMessage>{errors.confirmPassword?.message}</FormErrorMessage>
+                )}
               </FormControl>
+
               <FormControl>
-                <Flex>
+                <Flex justifyContent="flex-end">
                   <Button
                     type="submit"
                     size="md"
@@ -142,6 +166,7 @@ const AccountForm = () => {
                     _hover={{ bgColor: "#fc7365" }}
                     _active={{ bgColor: "#ee5140" }}
                     _focus={{ boxShadow: "none" }}
+                    onClick={handleSubmit(onSubmit, onError)}
                   >
                     Submit
                   </Button>
