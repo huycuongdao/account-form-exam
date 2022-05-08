@@ -12,7 +12,6 @@ import {
   Input,
   Button,
   FormErrorMessage,
-  ChakraProvider,
 } from "@chakra-ui/react";
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { RiErrorWarningLine } from "react-icons/ri";
@@ -69,105 +68,88 @@ const AccountForm = () => {
   const onError: SubmitErrorHandler<FormValues> = (errors) => console.log("errors", errors);
 
   return (
-    <ChakraProvider theme={theme}>
-      <Box bgColor="#f3f3f3" h="100vh">
-        <Center>
-          <Flex width="464px" my="64px" direction="column" align="center">
-            <Heading mb="16px" fontSize="24px">
-              Account
-            </Heading>
-            <Stack w="full" spacing="16px">
-              <Stack
-                as="section"
-                w="full"
-                p="32px"
-                spacing="24px"
-                direction="column"
-                bgColor="white"
-                borderRadius="4px"
-              >
-                <Heading fontSize="16px">Set Password</Heading>
-                <FormControl>
-                  <Alert status="error" bgColor="#feeeed">
-                    <AlertIcon as={RiErrorWarningLine} />
-                    <AlertDescription fontSize="12px" color="#f65e4e">
-                      Your account don’t have password yet. Set password so you can log in with your Layoutbase
-                      account.
-                    </AlertDescription>
-                  </Alert>
-                </FormControl>
+    <Box bgColor="#f3f3f3" h="100vh">
+      <Center>
+        <Flex width="464px" my="64px" direction="column" align="center">
+          <Heading mb="16px" fontSize="24px">
+            Account
+          </Heading>
+          <Stack w="full" spacing="16px">
+            <Stack
+              as="section"
+              w="full"
+              p="32px"
+              spacing="24px"
+              direction="column"
+              bgColor="white"
+              borderRadius="4px"
+            >
+              <Heading fontSize="16px">Set Password</Heading>
+              <FormControl>
+                <Alert status="error" bgColor="#feeeed">
+                  <AlertIcon as={RiErrorWarningLine} />
+                  <AlertDescription fontSize="12px" color="#f65e4e">
+                    Your account don’t have password yet. Set password so you can log in with your Layoutbase
+                    account.
+                  </AlertDescription>
+                </Alert>
+              </FormControl>
 
-                <FormControl>
-                  <FormLabel htmlFor="email">
-                    Email (Your account)
-                  </FormLabel>
-                  <Input
-                    id="email"
-                    value="hello@branch8.com"
-                    isDisabled
-                    {...register("email")}
-                  />
-                </FormControl>
+              <FormControl>
+                <FormLabel htmlFor="email">Email (Your account)</FormLabel>
+                <Input id="email" value="hello@branch8.com" isDisabled {...register("email")} />
+              </FormControl>
 
-                <FormControl isInvalid={!!errors.password}>
-                  <FormLabel htmlFor="password">
-                    Set Password
-                  </FormLabel>
-                  <Input
-                    id="password"
-                    {...register("password", {
-                      required: "Password is required!",
-                      minLength: {
-                        value: 8,
-                        message: "Password must be at least 8 characters",
+              <FormControl isInvalid={!!errors.password}>
+                <FormLabel htmlFor="password">Set Password</FormLabel>
+                <Input
+                  id="password"
+                  {...register("password", {
+                    required: "Password is required!",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters",
+                    },
+                    pattern: {
+                      value: PASSWORD_PATTERN,
+                      message: "Password must be at least one letter, one number and one special character.",
+                    },
+                  })}
+                />
+                {errors.password && <FormErrorMessage>{errors.password.message}</FormErrorMessage>}
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.confirmPassword}>
+                <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+                <Input
+                  id="confirmPassword"
+                  {...register("confirmPassword", {
+                    required: "Please confirm password!",
+                    validate: {
+                      matchesPreviousPassword: (value) => {
+                        const { password } = getValues();
+                        return password === value || "Please make sure your passwords match.";
                       },
-                      pattern: {
-                        value: PASSWORD_PATTERN,
-                        message: "Password must be at least one letter, one number and one special character.",
-                      },
-                    })}
-                  />
-                  {errors.password && <FormErrorMessage>{errors.password.message}</FormErrorMessage>}
-                </FormControl>
+                    },
+                  })}
+                />
+                {errors.confirmPassword && (
+                  <FormErrorMessage>{errors.confirmPassword?.message}</FormErrorMessage>
+                )}
+              </FormControl>
 
-                <FormControl isInvalid={!!errors.confirmPassword}>
-                  <FormLabel htmlFor="confirmPassword">
-                    Confirm Password
-                  </FormLabel>
-                  <Input
-                    id="confirmPassword"
-                    {...register("confirmPassword", {
-                      required: "Please confirm password!",
-                      validate: {
-                        matchesPreviousPassword: (value) => {
-                          const { password } = getValues();
-                          return password === value || "Please make sure your passwords match.";
-                        },
-                      },
-                    })}
-                  />
-                  {errors.confirmPassword && (
-                    <FormErrorMessage>{errors.confirmPassword?.message}</FormErrorMessage>
-                  )}
-                </FormControl>
-
-                <FormControl>
-                  <Flex justifyContent="flex-end">
-                    <Button
-                      type="submit"
-                      size="md"
-                      onClick={handleSubmit(onSubmit, onError)}
-                    >
-                      Submit
-                    </Button>
-                  </Flex>
-                </FormControl>
-              </Stack>
+              <FormControl>
+                <Flex justifyContent="flex-end">
+                  <Button type="submit" size="md" onClick={handleSubmit(onSubmit, onError)}>
+                    Submit
+                  </Button>
+                </Flex>
+              </FormControl>
             </Stack>
-          </Flex>
-        </Center>
-      </Box>
-    </ChakraProvider>
+          </Stack>
+        </Flex>
+      </Center>
+    </Box>
   );
 };
 
