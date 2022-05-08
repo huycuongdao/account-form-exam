@@ -15,7 +15,6 @@ import {
 } from "@chakra-ui/react";
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
 import { RiErrorWarningLine } from "react-icons/ri";
-import theme from "./theme";
 
 /*
 Task:
